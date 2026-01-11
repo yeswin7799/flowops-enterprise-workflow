@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FlowOps.Application\FlowOps.Application.csproj" />
+    <ProjectReference Include="..\FlowOps.Domain\FlowOps.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Configurations\" />
+    <Folder Include="Jobs\" />
+    <Folder Include="Services\" />
+    <Folder Include="Persistence\" />
+  </ItemGroup>
+
+</Project>
