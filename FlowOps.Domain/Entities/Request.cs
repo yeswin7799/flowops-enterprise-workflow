@@ -1,53 +1,82 @@
 ﻿using FlowOps.Domain.Common;
 using FlowOps.Domain.Enums;
 
-namespace FlowOps.Domain.Entities
+namespace FlowOps.Domain.Entities;
+
+public class Request : BaseEntity
 {
-    public class Request : BaseEntity
-    {
-        public string Title { get; private set; }
-        public string Description { get; private set; }
-        public RequestPriority Priority { get; private set; }
-        public RequestStatus Status { get; private set; }
+    private readonly List<RequestStatusHistory> _statusHistory = new();
 
-        public Guid CreatedByUserId { get; private set; }
-        public Guid? AssignedToUserId { get; private set; }
+    public string Title { get; private set; }
+    public string Description { get; private set; }
+    public RequestPriority Priority { get; private set; }
 
-        private Request() { }
+    public RequestStatus Status { get; private set; }
 
-        public Request(
+    public Guid CreatedByUserId { get; private set; }
+    public Guid? AssignedToUserId { get; private set; }
+    public Guid WorkflowTemplateId { get; private set; }
+
+
+    public IReadOnlyCollection<RequestStatusHistory> StatusHistory =>
+        _statusHistory.AsReadOnly();
+
+    private Request() { }
+
+    public Request(
         string title,
         string description,
         RequestPriority priority,
+        Guid workflowTemplateId,
         Guid createdByUserId)
-        {
-            Title = title;
-            Description = description;
-            Priority = priority;
-            Status = RequestStatus.Draft;
-            CreatedByUserId = createdByUserId;
-        }
+    {
+        Title = title;
+        Description = description;
+        Priority = priority;
 
-        public void Submit()
-        {
-            if (Status != RequestStatus.Draft)
-                throw new InvalidOperationException("Only draft requests can be submitted.");
-            Status = RequestStatus.Submitted;
-            MarkUpdated();
-        }
+        WorkflowTemplateId = workflowTemplateId;
+        CreatedByUserId = createdByUserId;
 
-        public void Assign(Guid userId)
-        {
-            AssignedToUserId = userId;
-            MarkUpdated();
-        }
-        public void ChangeStatus(RequestStatus newStatus)
-        {
-            if (Status == newStatus)
-                return;
+        Status = RequestStatus.Draft;
 
-            Status = newStatus;
-            MarkUpdated();
-        }
+        _statusHistory.Add(
+            RequestStatusHistory.Create(
+                Id,
+                Status,
+                Status,
+                createdByUserId
+            )
+        );
+    }
+
+    // 🔒 ONLY valid way to change status
+    public void ChangeStatus(
+        WorkflowState currentState,
+        RequestStatus newStatus,
+        Guid changedByUserId)
+    {
+        if (!currentState.CanTransitionTo(newStatus))
+            throw new InvalidOperationException(
+                $"Transition from {Status} to {newStatus} is not allowed.");
+
+        var previousStatus = Status;
+        Status = newStatus;
+
+        _statusHistory.Add(
+            RequestStatusHistory.Create(
+                Id,
+                previousStatus,
+                newStatus,
+                changedByUserId
+            )
+        );
+
+        MarkUpdated();
+    }
+
+    public void Assign(Guid userId)
+    {
+        AssignedToUserId = userId;
+        MarkUpdated();
     }
 }

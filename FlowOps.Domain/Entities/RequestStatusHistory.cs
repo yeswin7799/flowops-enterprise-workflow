@@ -13,7 +13,7 @@ public class RequestStatusHistory : BaseEntity
 
     private RequestStatusHistory() { }
 
-    public RequestStatusHistory(
+    private RequestStatusHistory(
         Guid requestId,
         RequestStatus fromStatus,
         RequestStatus toStatus,
@@ -24,5 +24,20 @@ public class RequestStatusHistory : BaseEntity
         ToStatus = toStatus;
         ChangedByUserId = changedByUserId;
         ChangedAtUtc = DateTime.UtcNow;
+    }
+
+    // ✅ Factory method (THIS is what we use)
+    public static RequestStatusHistory Create(
+        Guid requestId,
+        RequestStatus fromStatus,
+        RequestStatus toStatus,
+        Guid changedByUserId)
+    {
+        return new RequestStatusHistory(
+            requestId,
+            fromStatus,
+            toStatus,
+            changedByUserId
+        );
     }
 }
