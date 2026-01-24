@@ -12,5 +12,6 @@ namespace FlowOps.Application.Interfaces
         Task<Request?> GetByIdAsync(Guid id);
         Task AddAsync(Request request);
         Task UpdateAsync(Request request);
+        Task<Request?> GetByIdWithHistoryAsync(Guid id);
     }
 }

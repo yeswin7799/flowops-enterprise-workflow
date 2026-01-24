@@ -31,4 +31,11 @@ public class RequestRepository : IRequestRepository
         _context.Requests.Update(request);
         await _context.SaveChangesAsync();
     }
+    public async Task<Request?> GetByIdWithHistoryAsync(Guid id)
+    {
+        return await _context.Requests
+            .Include(r => r.StatusHistory)
+            .FirstOrDefaultAsync(r => r.Id == id);
+    }
+
 }

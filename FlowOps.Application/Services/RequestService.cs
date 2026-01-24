@@ -45,9 +45,13 @@ public class RequestService
 
     public async Task<Request?> GetByIdAsync(Guid id)
     {
-        return await _requestRepository.GetByIdAsync(id);
-    }
+        var request = await _requestRepository.GetByIdWithHistoryAsync(id);
 
+        if (request == null)
+            throw new InvalidOperationException("Request not found");
+
+        return request;
+    }
 
 
     public async Task SubmitRequestAsync(
@@ -77,5 +81,7 @@ public class RequestService
 
         await _requestRepository.UpdateAsync(request);
     }
+
+
 
 }

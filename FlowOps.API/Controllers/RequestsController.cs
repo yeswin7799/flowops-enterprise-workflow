@@ -62,9 +62,29 @@ public class RequestsController : ControllerBase
     {
         var request = await _requestService.GetByIdAsync(id);
 
-        if (request is null)
-            return NotFound();
+        var dto = new RequestDetailsDto
+        {
+            Id = request.Id,
+            Title = request.Title,
+            Description = request.Description,
+            Priority = request.Priority,
+            Status = request.Status,
+            CreatedByUserId = request.CreatedByUserId,
+            AssignedToUserId = request.AssignedToUserId,
+            StatusHistory = request.StatusHistory
+                .Select(h => new RequestStatusHistoryDto
+                {
+                    FromStatus = h.FromStatus,
+                    ToStatus = h.ToStatus,
+                    ChangedByUserId = h.ChangedByUserId,
+                    ChangedAtUtc = h.ChangedAtUtc
+                })
+                .ToList()
+        };
 
-        return Ok(request);
+        return Ok(dto);
     }
+
+
+
 }
